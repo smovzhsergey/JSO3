@@ -1,23 +1,24 @@
-const array = [1, 2, 3, 6, 5, 4];
+const array = [1, 2, 3, 6, 4, 5];
 let length = array.length;
 
 /* Sort */
 
 for (let i = 0; i < length; i++) {
     let max = array[i];
+    let currentIndex;
 
     for (let j = i; j < length; j ++) {
         
-        if ( max > array[j]) {
-            max = max
-        } else {
+        if ( max < array[j]) {
             max = array[j];
             currentIndex = j;
         }
     }
-        
-    array[currentIndex] = array[i];
-    array[i] = max;
+
+    if (currentIndex) {    
+        array[currentIndex] = array[i];
+        array[i] = max;
+    }
 }
 
 console.log('Sort       ', array);
