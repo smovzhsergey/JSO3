@@ -52,8 +52,37 @@ class DB {
                 if (templateField.length === 0) {
                     throw new Error(`Object is not valid!!! Object contains a wrong field - "${objectField[0]}"!`);
                 }
-                if (typeof objectField[1] !== templateField[0][1]) {
-                    throw new Error(`Object is not valid !!! Field "${objectField[0]}" must be a/an "${templateField[0][1]}" type, not a/an "${typeof objectField[1]}" type.`);
+                
+                if (action === 'find') {
+                    
+                    if (templateField[0][1] === 'string') {
+                        
+                        if (typeof objectField[1] !== templateField[0][1]) {
+                            throw new Error(`Object is not valid !!! Field "${objectField[0]}" must be a "${templateField[0][1]}" type, not a/an "${typeof objectField[1]}" type.`);
+                        }
+                    } else {
+                        
+                        for (let field in objectField[1]) {
+
+                            if (typeof objectField[1][field] !== 'number') {
+                                
+                                throw new Error(`Object is not valid !!! Value  "${field}" of field "${objectField[0]}" must be a "${templateField[0][1]}" type, not a/an "${typeof objectField[1][field]}" type.`);
+                            }
+
+                        }
+
+                        if (objectField[1]['min'] > objectField[1]['max']) { 
+                            throw new Error(`Object is not valid !!! Value  "max" of field "${objectField[0]}" must be a a more than value "min"`);
+                        }
+                    }
+                
+                } 
+                
+                if (action === 'update') {
+
+                    if (typeof objectField[1] !== templateField[0][1]) {
+                        throw new Error(`Object is not valid !!! Field "${objectField[0]}" must be a/an "${templateField[0][1]}" type, not a/an "${typeof objectField[1]}" type.`);
+                    }
                 }
             });
         }
@@ -155,9 +184,10 @@ class DB {
 
     find (query) {
 
+        DB.checkObject(query, 'find');
+
         let usersByQuery = [];
         const users = [ ...this.db ];
-        // const queryFields = Object.entries(query);
         
         users.forEach( ( user ) => {
             
@@ -222,11 +252,10 @@ class DB {
 
             if (isUserSuitable) {
                 usersByQuery.push(currentUser);
-            }
-
-            
+            }            
         });
-        console.log(usersByQuery)
+
+        return usersByQuery;
     }
 }
 
@@ -239,39 +268,20 @@ const person = {
     salary: 500 // обязательное поле с типом number
 };
 
-const person1 = { name: 'Roman', age: 25, country: 'ua', salary: 650 };
-const person2 = { name: 'Anton', age: 30, country: 'us', salary: 400 };
-const person3 = { name: 'Dima', age: 35, country: 'ua', salary: 299 };
-const person4 = { name: 'Dima', age: 40, country: 'us', salary: 350 };
-const person5 = { name: 'Lox', age: 45, country: 'ua', salary: 1000 };
-const person6 = { name: 'PPC', age: 50, country: 'au', salary: 2000 };
-
-
-
 const id = db.create(person);
-const id1 = db.create(person1);
-const id2 = db.create(person2);
-const id3 = db.create(person3);
-const id4 = db.create(person4);
-const id5 = db.create(person5);
-const id6 = db.create(person6);
-// db.update(id, { age: 22 }); // id
-// db.delete(id); // true
-
-
 
 const query = {
-    // name: 'Pitter',
     country: 'ua',
     age: {
-        min: 20
+        min: 21
     },
     salary: {
         min: 300,
-        max: 700,
+        max: 600
     }
 };
 
 const customers = db.find(query); // массив пользователей
+console.log(customers)
 
 exports.DB = DB;
